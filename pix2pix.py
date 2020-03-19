@@ -15,21 +15,14 @@ import sys
 from data_loader import DataLoader
 import numpy as np
 import os
-import tensorflow as tf
+from keras.utils import multi_gpu_model
 
 class Pix2Pix():
 
 
     def __init__(self):
     
-        #from keras import backend as K
-        
-        #server = tf.train.Server.create_local_server()
-        #sess = tf.Session(server.target)
-        #config = tf.ConfigProto()
-        #config.gpu_options.allow_growth=True
-        #sess = tf.Session(config=config)
-        #K.set_session(sess) 
+        self.numGPUs = 4
         
         # Input shape
         self.img_rows = 256
@@ -80,7 +73,8 @@ class Pix2Pix():
         valid = self.discriminator([fake_A, img_B])
 
         self.combined = Model(inputs=[img_A, img_B], outputs=[valid, fake_A])
-        self.combined = multi_gpu_model(self.combined, gpus=4)
+        if self.numGPUs > 1:
+            self.combined = multi_gpu_model(self.combined, gpus=self.numGPUs)
         self.combined.compile(loss=['mse', 'mae'],
                               loss_weights=[1, 100],
                               optimizer=optimizer)
