@@ -225,4 +225,4 @@ class Pix2Pix():
 #if this is the function that called this function then...
 if __name__ == '__main__':
     gan = Pix2Pix()
-    gan.train(epochs=100, batch_size=25, sample_interval=5000)
+    gan.train(epochs=100, batch_size=100, sample_interval=5000)

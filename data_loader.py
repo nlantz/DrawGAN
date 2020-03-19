@@ -1,4 +1,6 @@
 #import scipy
+import os
+import time
 from glob import glob
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +10,7 @@ class DataLoader():
     def __init__(self, dataset_name, img_res=(128, 128)):
         self.dataset_name = dataset_name
         self.img_res = img_res
+        np.random.seed(42)
 
     def load_data(self, batch_size=10, is_testing=False):
        
@@ -37,8 +40,9 @@ class DataLoader():
 
     def load_batch(self, batch_size=1, is_testing=False):
         data_type = "train" if not is_testing else "test"
-        path_A = glob('./datasets/%s/%s/features/*' % (self.dataset_name, data_type))
-        path_B = glob('./datasets/%s/%s/targets/*' % (self.dataset_name, data_type))
+        path_A = sorted(glob('./datasets/%s/%s/features/*' % (self.dataset_name, data_type)))
+        path_B = sorted(glob('./datasets/%s/%s/targets/*' % (self.dataset_name, data_type)))
+        
         image_indexes = np.random.random_integers(0, high=len(path_A), size=batch_size)
 
         imgs_A = []
