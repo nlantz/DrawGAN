@@ -163,10 +163,9 @@ class Pix2Pix():
         for epoch in range(epochs):
 
             for batch_i in range(numBatches):
-                images = self.data_loader.load_batch(batch_size)
+                images = self.data_loader.load_batch(batch_size=batch_size)
                 imgs_A = images[1][:][:][:][:]
                 imgs_B = images[0][:][:][:][:]
-
 
                 # ---------------------
                 #  Train Discriminator
@@ -197,12 +196,17 @@ class Pix2Pix():
                 # If at save interval => save generated image samples
                 if batch_i % sample_interval == 0:
                     self.sample_images(epoch, batch_i)
+                    self.generator.save("drawGAN_Model.h5")
 
     def sample_images(self, epoch, batch_i):
         os.makedirs('images/%s' % self.dataset_name, exist_ok=True)
         r, c = 3, 3
 
-        imgs_A, imgs_B = self.data_loader.load_batch(batch_size=3)#, is_testing=True)
+        #imgs_A, imgs_B = self.data_loader.load_batch(batch_size=3)#, is_testing=True)
+        images = self.data_loader.load_batch(batch_size=3)
+        imgs_A = images[1][:][:][:][:]
+        imgs_B = images[0][:][:][:][:]
+        
         fake_A = self.generator.predict(imgs_B)
 
         gen_imgs = np.concatenate([imgs_B, fake_A, imgs_A])
