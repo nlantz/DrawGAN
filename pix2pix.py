@@ -16,6 +16,7 @@ from data_loader import DataLoader
 import numpy as np
 import os
 from keras.utils import multi_gpu_model
+from PIL import Image
 
 class Pix2Pix():
 
@@ -25,8 +26,8 @@ class Pix2Pix():
         self.numGPUs = 4
         
         # Input shape
-        self.img_rows = 256
-        self.img_cols = 256
+        self.img_rows = 1024
+        self.img_cols = 1024
         self.channels = 3
         self.img_shape = (self.img_rows, self.img_cols, self.channels)
 
@@ -43,7 +44,7 @@ class Pix2Pix():
         self.gf = 64
         self.df = 64
 
-        optimizer = Adam(learning_rate = 0.0002, beta_1 = 0.9)
+        optimizer = Adam(0.0005,0.9)
 
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
@@ -73,8 +74,12 @@ class Pix2Pix():
         valid = self.discriminator([fake_A, img_B])
 
         self.combined = Model(inputs=[img_A, img_B], outputs=[valid, fake_A])
+        
+        #set model to run on all GPUs
         if self.numGPUs > 1:
             self.combined = multi_gpu_model(self.combined, gpus=self.numGPUs)
+            
+        #compile model 
         self.combined.compile(loss=['mse', 'mae'],
                               loss_weights=[1, 100],
                               optimizer=optimizer)
@@ -163,6 +168,7 @@ class Pix2Pix():
         for epoch in range(epochs):
 
             for batch_i in range(numBatches):
+                self.sample_image_headless(epoch, batch_i)
                 images = self.data_loader.load_batch(batch_size=batch_size)
                 imgs_A = images[1][:][:][:][:]
                 imgs_B = images[0][:][:][:][:]
@@ -195,8 +201,10 @@ class Pix2Pix():
 
                 # If at save interval => save generated image samples
                 if batch_i % sample_interval == 0:
-                    self.sample_images(epoch, batch_i)
-                    self.generator.save("drawGAN_Model.h5")
+                    #self.sample_images(epoch, batch_i)
+                    self.sample_image_headless(epoch, batch_i)
+                    #self.generator.save("drawGAN_generator_Model.h5")
+                    #self.combined.save("drawGAN__Model.h5")
 
     def sample_images(self, epoch, batch_i):
         os.makedirs('images/%s' % self.dataset_name, exist_ok=True)
@@ -225,8 +233,26 @@ class Pix2Pix():
                 cnt += 1
         fig.savefig("images/%s/%d_%d.png" % (self.dataset_name, epoch, batch_i))
         #plt.close()
+        
+    def sample_image_headless(self, epoch, batch_i):
+        os.makedirs('images/%s' % self.dataset_name, exist_ok=True)
+
+        #imgs_A, imgs_B = self.data_loader.load_batch(batch_size=3)#, is_testing=True)
+        images = self.data_loader.load_batch(batch_size=1)
+       
+        
+        imgs_B = images[0][:][:][:][:]
+        fake_A = np.squeeze(self.generator.predict(imgs_B), axis=0)
+        
+        imgs_A = np.squeeze(images[1][:][:][:][:], axis=0)
+        imgs_B = np.squeeze(imgs_B, axis=0)
+        
+        newImg = np.concatenate((imgs_B, fake_A, imgs_A))
+        newImg = Image.fromarray(np.uint8((newImg+1)*127.5))
+        newImg.save("images/%s/%d_%d.jpg" % (self.dataset_name, epoch, batch_i))
+
 
 #if this is the function that called this function then...
 if __name__ == '__main__':
     gan = Pix2Pix()
-    gan.train(epochs=1000, batch_size=100, sample_interval=5000)
+    gan.train(epochs=1000, batch_size=10, sample_interval=5000)
