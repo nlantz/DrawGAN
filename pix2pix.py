@@ -43,7 +43,7 @@ class Pix2Pix():
         self.gf = 64
         self.df = 64
 
-        optimizer = Adam(0.0002, 0.5)
+        optimizer = Adam(learning_rate = 0.0002, beta_1 = 0.9)
 
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
@@ -229,4 +229,4 @@ class Pix2Pix():
 #if this is the function that called this function then...
 if __name__ == '__main__':
     gan = Pix2Pix()
-    gan.train(epochs=100, batch_size=100, sample_interval=5000)
+    gan.train(epochs=1000, batch_size=100, sample_interval=5000)

@@ -45,14 +45,14 @@ class DataLoader():
         
         #np.random.seed(int(time.time()))
         image_indexes = np.random.random_integers(0, high=len(path_A), size=batch_size)
-        print(path_A[image_indexes[1]])
+       # print(path_A[image_indexes[1]])
         imgs_A = []
         imgs_B = []
         for i in range(len(image_indexes)):
 
             
-            img_A = self.imread(path_A[image_indexes[i]])
-            img_B = self.imread(path_B[image_indexes[i]])
+            img_A = self.imread(path_A[image_indexes[i]-1])
+            img_B = self.imread(path_B[image_indexes[i]-1])
 
             img_A = np.array(img_A.resize(self.img_res))
             img_B = np.array(img_B.resize(self.img_res))
