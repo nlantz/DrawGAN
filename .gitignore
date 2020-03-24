@@ -137,3 +137,5 @@ dmypy.json
 data_loader_test.py
 
 *.filepart
+
+*.h5
