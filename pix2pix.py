@@ -168,7 +168,7 @@ class Pix2Pix():
         for epoch in range(epochs):
 
             for batch_i in range(numBatches):
-                self.sample_image_headless(epoch, batch_i)
+                #self.sample_image_headless(epoch, batch_i)
                 images = self.data_loader.load_batch(batch_size=batch_size)
                 imgs_A = images[1][:][:][:][:]
                 imgs_B = images[0][:][:][:][:]
@@ -255,4 +255,4 @@ class Pix2Pix():
 #if this is the function that called this function then...
 if __name__ == '__main__':
     gan = Pix2Pix()
-    gan.train(epochs=1000, batch_size=10, sample_interval=5000)
+    gan.train(epochs=1000, batch_size=4, sample_interval=5000)
